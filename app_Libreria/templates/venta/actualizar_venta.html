@@ -1,0 +1,102 @@
+<!-- templates/venta/actualizar_venta.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="soft-card p-4">
+    <h2>✏️ Actualizar Venta</h2>
+    
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    {% endif %}
+    
+    <form method="post" action="{% url 'realizar_actualizacion_venta' venta.id %}">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Libro *</label>
+                    <select class="form-select" name="libro" required>
+                        {% for libro in libros %}
+                            <option value="{{ libro.id }}" 
+                                {% if libro.id == venta.libro.id %}selected{% endif %}
+                                data-precio="{{ libro.precio }}">
+                                {{ libro.titulo }} - Stock: {{ libro.stock }} - ${{ libro.precio }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Cantidad *</label>
+                    <input type="number" class="form-control" name="cantidad" 
+                           value="{{ venta.cantidad }}" min="1" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Precio Unitario *</label>
+                    <input type="number" step="0.01" class="form-control" name="precio_unitario" 
+                           value="{{ venta.precio_unitario }}" required>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Nombre del Cliente *</label>
+                    <input type="text" class="form-control" name="cliente_nombre" 
+                           value="{{ venta.cliente_nombre }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Email del Cliente *</label>
+                    <input type="email" class="form-control" name="cliente_email" 
+                           value="{{ venta.cliente_email }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Estado *</label>
+                    <select class="form-select" name="estado" required>
+                        <option value="PEN" {% if venta.estado == 'PEN' %}selected{% endif %}>Pendiente</option>
+                        <option value="COM" {% if venta.estado == 'COM' %}selected{% endif %}>Completada</option>
+                        <option value="CAN" {% if venta.estado == 'CAN' %}selected{% endif %}>Cancelada</option>
+                        <option value="DEV" {% if venta.estado == 'DEV' %}selected{% endif %}>Devuelta</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3 p-3 bg-light rounded">
+            <h6>Información de la Venta:</h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Total Actual:</strong> ${{ venta.total }}<br>
+                    <strong>Fecha de Venta:</strong> {{ venta.fecha_venta|date:"d/m/Y H:i" }}
+                </div>
+                <div class="col-md-6">
+                    <strong>Libro Actual:</strong> {{ venta.libro.titulo }}<br>
+                    <strong>Stock Actual:</strong> {{ venta.libro.stock }} unidades
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{% url 'ver_ventas' %}" class="btn btn-secondary me-md-2">Cancelar</a>
+            <button type="submit" class="btn btn-warning">Actualizar Venta</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Auto-completar precio cuando se selecciona un libro
+    document.querySelector('select[name="libro"]').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const precio = selectedOption.getAttribute('data-precio');
+        if (precio) {
+            document.querySelector('input[name="precio_unitario"]').value = precio;
+        }
+    });
+</script>
+{% endblock %}
